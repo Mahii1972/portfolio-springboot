@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-5">My Portfolio</h1>
+        
+        <div id="loading" class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading portfolio data...</p>
+        </div>
+        
+        <div id="portfolio-data" style="display: none;">
+            <!-- Personal Info Section -->
+            <div id="personal-info" class="row mb-5">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <!-- Education Section -->
+            <h2 class="section-title">Education</h2>
+            <div id="education" class="row">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <!-- Experience Section -->
+            <h2 class="section-title">Experience</h2>
+            <div id="experience" class="row">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <!-- Projects Section -->
+            <h2 class="section-title">Projects</h2>
+            <div id="projects" class="row">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <!-- Skills Section -->
+            <h2 class="section-title">Skills</h2>
+            <div id="skills" class="row">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <!-- Interests and Languages Section -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h2 class="section-title">Interests</h2>
+                    <div id="interests">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h2 class="section-title">Languages</h2>
+                    <div id="languages">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch portfolio data from API
+            fetch('http://localhost:8080/api/portfolio/raw')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Portfolio data:', data);
+                    displayPortfolioData(data);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('portfolio-data').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                    document.getElementById('loading').innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            Error loading portfolio data: ${error.message}
+                        </div>
+                    `;
+                });
+        });
+
+        function displayPortfolioData(data) {
+            // Display Personal Info
+            if (data.personalInfo) {
+                const personalInfo = data.personalInfo;
+                const personalInfoHTML = `
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3 text-center">
+                                        <img src="${personalInfo.avatar_url || 'https://via.placeholder.com/150'}" 
+                                             alt="${personalInfo.full_name}" 
+                                             class="img-fluid rounded-circle mb-3 profile-img">
+                                    </div>
+                                    <div class="col-md-9">
+                                        <h2>${personalInfo.full_name || 'Name Not Available'}</h2>
+                                        <h4 class="text-muted">${personalInfo.title || 'Title Not Available'}</h4>
+                                        <p class="mb-2"><i class="bi bi-geo-alt-fill"></i> ${personalInfo.location || 'Location Not Available'}</p>
+                                        <p class="mb-2"><i class="bi bi-envelope-fill"></i> ${personalInfo.email || 'Email Not Available'}</p>
+                                        <p class="mb-2"><i class="bi bi-telephone-fill"></i> ${personalInfo.phone || 'Phone Not Available'}</p>
+                                        <div class="mt-3">
+                                            ${personalInfo.linkedin_url ? `<a href="https://${personalInfo.linkedin_url}" class="btn btn-outline-primary me-2" target="_blank"><i class="bi bi-linkedin"></i> LinkedIn</a>` : ''}
+                                            ${personalInfo.github_url ? `<a href="https://${personalInfo.github_url}" class="btn btn-outline-dark" target="_blank"><i class="bi bi-github"></i> GitHub</a>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                ${personalInfo.about_me ? `
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <h5>About Me</h5>
+                                        <p>${personalInfo.about_me}</p>
+                                    </div>
+                                </div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('personal-info').innerHTML = personalInfoHTML;
+            }
+
+            // Display Education
+            if (data.education && data.education.length > 0) {
+                const educationHTML = data.education.map(edu => `
+                    <div class="col-md-12">
+                        <div class="timeline-item">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">${edu.institution || 'Institution Not Available'}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">
+                                        ${edu.degree || ''} ${edu.field_of_study ? `in ${edu.field_of_study}` : ''}
+                                    </h6>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar-event"></i> ${formatDate(edu.start_date)} - ${formatDate(edu.end_date)}
+                                        </small>
+                                    </p>
+                                    ${edu.grade ? `<p class="card-text"><i class="bi bi-award"></i> Grade: ${edu.grade}</p>` : ''}
+                                    ${edu.location ? `<p class="card-text"><i class="bi bi-geo-alt"></i> Location: ${edu.location}</p>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('education').innerHTML = educationHTML;
+            } else {
+                document.getElementById('education').innerHTML = '<div class="col-12"><p class="text-muted">No education information available</p></div>';
+            }
+
+            // Display Experience
+            if (data.experience && data.experience.length > 0) {
+                const experienceHTML = data.experience.map(exp => `
+                    <div class="col-md-12">
+                        <div class="timeline-item">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">${exp.title || 'Title Not Available'}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">${exp.company || 'Company Not Available'}</h6>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            ${formatDate(exp.start_date)} - ${exp.is_current ? 'Present' : formatDate(exp.end_date)}
+                                            ${exp.location ? ` | ${exp.location}` : ''}
+                                        </small>
+                                    </p>
+                                    ${exp.description ? `<p class="card-text">${exp.description}</p>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('experience').innerHTML = experienceHTML;
+            } else {
+                document.getElementById('experience').innerHTML = '<div class="col-12"><p class="text-muted">No experience information available</p></div>';
+            }
+
+            // Display Projects
+            if (data.projects && data.projects.length > 0) {
+                const projectsHTML = data.projects.map(project => `
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            ${project.image_url ? `
+                                <img src="${project.image_url}" class="card-img-top" alt="${project.title}">
+                            ` : ''}
+                            <div class="card-body">
+                                <h5 class="card-title">${project.title || 'Project Title Not Available'}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">${project.year || ''}</h6>
+                                <p class="card-text">${project.description || 'No description available'}</p>
+                                <div class="mb-3">
+                                    ${project.technologies && project.technologies.length > 0 ? 
+                                        project.technologies.map(tech => 
+                                            `<span class="badge bg-secondary badge-tech">${tech}</span>`
+                                        ).join('') : ''}
+                                </div>
+                                <div class="d-flex gap-2">
+                                    ${project.project_url ? `<a href="${project.project_url}" class="btn btn-sm btn-primary" target="_blank">View Project</a>` : ''}
+                                    ${project.github_url ? `<a href="${project.github_url}" class="btn btn-sm btn-outline-dark" target="_blank">View Code</a>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('projects').innerHTML = projectsHTML;
+            } else {
+                document.getElementById('projects').innerHTML = '<div class="col-12"><p class="text-muted">No projects available</p></div>';
+            }
+
+            // Display Skills
+            if (data.skillCategories && data.skillCategories.length > 0) {
+                const skillsHTML = data.skillCategories.map(category => `
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">${category.name || 'Category'}</h5>
+                                <ul class="list-group list-group-flush">
+                                    ${category.skills && category.skills.length > 0 ? 
+                                        category.skills.map(skill => 
+                                            `<li class="list-group-item">${skill.name}</li>`
+                                        ).join('') : 
+                                        '<li class="list-group-item">No skills in this category</li>'}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('skills').innerHTML = skillsHTML;
+            } else {
+                document.getElementById('skills').innerHTML = '<div class="col-12"><p class="text-muted">No skills information available</p></div>';
+            }
+
+            // Display Interests
+            if (data.interests && data.interests.length > 0) {
+                const interestsHTML = `
+                    <ul class="list-group">
+                        ${data.interests.map(interest => 
+                            `<li class="list-group-item">${interest.name}</li>`
+                        ).join('')}
+                    </ul>
+                `;
+                document.getElementById('interests').innerHTML = interestsHTML;
+            } else {
+                document.getElementById('interests').innerHTML = '<p class="text-muted">No interests information available</p>';
+            }
+
+            // Display Languages
+            if (data.languages && data.languages.length > 0) {
+                const languagesHTML = `
+                    <ul class="list-group">
+                        ${data.languages.map(language => `
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>${language.name}</span>
+                                    <span class="badge bg-primary rounded-pill">${language.proficiency_level}</span>
+                                </div>
+                                ${language.certification ? `<small class="text-muted">Certification: ${language.certification}</small>` : ''}
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+                document.getElementById('languages').innerHTML = languagesHTML;
+            } else {
+                document.getElementById('languages').innerHTML = '<p class="text-muted">No languages information available</p>';
+            }
+        }
+
+        // Helper function to format dates
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString; // Return as is if invalid
+            
+            const options = { year: 'numeric', month: 'short' };
+            return date.toLocaleDateString('en-US', options);
+        }
+    </script>
+</body>
+</html> 
