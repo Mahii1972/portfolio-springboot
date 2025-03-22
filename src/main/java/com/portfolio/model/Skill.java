@@ -15,6 +15,7 @@ public class Skill {
 
     private String name;
     private Integer displayOrder;
+    private Integer level;
     
     @Column(name = "category_id")
     private Long categoryId;

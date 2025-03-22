@@ -151,7 +151,7 @@ public class PortfolioService {
         for (Map<String, Object> category : categories) {
             Long categoryId = ((Number) category.get("id")).longValue();
             List<Map<String, Object>> skills = jdbcTemplate.queryForList(
-                "SELECT name FROM skills WHERE category_id = ? ORDER BY display_order", 
+                "SELECT name, level FROM skills WHERE category_id = ? ORDER BY display_order", 
                 categoryId);
             category.put("skills", skills);
         }

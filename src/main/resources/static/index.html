@@ -135,6 +135,29 @@
                         </div>
                     `;
                 });
+
+            // Add event listener for skill point clicks
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('skill-point')) {
+                    // Create a flash effect
+                    const flash = document.createElement('div');
+                    flash.className = 'skill-flash';
+                    e.target.appendChild(flash);
+                    
+                    // Play a "level up" sound
+                    const skillSound = new Audio();
+                    skillSound.src = 'data:audio/wav;base64,UklGRlYDAABXQVZFZm10...'; // Truncated
+                    skillSound.volume = 0.1;
+                    skillSound.play().catch(e => console.log('Audio play prevented by browser policy'));
+                    
+                    // Remove the flash after animation completes
+                    setTimeout(() => {
+                        if (flash && flash.parentNode) {
+                            flash.parentNode.removeChild(flash);
+                        }
+                    }, 500);
+                }
+            });
         });
 
         function displayPortfolioData(data) {
@@ -153,7 +176,7 @@
                                     </div>
                                     <div class="col-md-9">
                                         <h2>${personalInfo.full_name || 'NAME NOT AVAILABLE'}</h2>
-                                        <h4 class="text-muted">${personalInfo.title || 'TITLE NOT AVAILABLE'}</h4>
+                                        <h4 class="title-text">${personalInfo.title || 'TITLE NOT AVAILABLE'}</h4>
                                         <p class="mb-2"><i class="bi bi-geo-alt-fill pixel-icon"></i> ${personalInfo.location || 'LOCATION NOT AVAILABLE'}</p>
                                         <p class="mb-2"><i class="bi bi-envelope-fill pixel-icon"></i> ${personalInfo.email || 'EMAIL NOT AVAILABLE'}</p>
                                         <p class="mb-2"><i class="bi bi-telephone-fill pixel-icon"></i> ${personalInfo.phone || 'PHONE NOT AVAILABLE'}</p>
@@ -185,11 +208,11 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title">${edu.institution || 'INSTITUTION NOT AVAILABLE'}</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">
-                                        ${edu.degree || ''} ${edu.field_of_study ? `in ${edu.field_of_study}` : ''}
+                                    <h6 class="card-subtitle mb-2">
+                                        <span class="credential-text">${edu.degree || ''}</span> ${edu.field_of_study ? `in ${edu.field_of_study}` : ''}
                                     </h6>
                                     <p class="card-text">
-                                        <small class="text-muted">
+                                        <small class="date-text">
                                             <i class="bi bi-calendar-event pixel-icon"></i> ${formatDate(edu.start_date)} - ${formatDate(edu.end_date)}
                                         </small>
                                     </p>
@@ -213,9 +236,9 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title">${exp.title || 'TITLE NOT AVAILABLE'}</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">${exp.company || 'COMPANY NOT AVAILABLE'}</h6>
+                                    <h6 class="card-subtitle mb-2 company-text">${exp.company || 'COMPANY NOT AVAILABLE'}</h6>
                                     <p class="card-text">
-                                        <small class="text-muted">
+                                        <small class="date-text">
                                             ${formatDate(exp.start_date)} - ${exp.is_current ? 'PRESENT' : formatDate(exp.end_date)}
                                             ${exp.location ? ` | ${exp.location}` : ''}
                                         </small>
@@ -243,7 +266,7 @@
                             ` : ''}
                             <div class="card-body">
                                 <h5 class="card-title">${project.title || 'PROJECT TITLE NOT AVAILABLE'}</h5>
-                                <h6 class="card-subtitle mb-2 text-muted">${project.year || ''}</h6>
+                                <h6 class="card-subtitle mb-2 date-text">${project.year || ''}</h6>
                                 <p class="card-text pixel-text">${project.description || 'NO DESCRIPTION AVAILABLE'}</p>
                                 <div class="mb-3">
                                     ${project.technologies && project.technologies.length > 0 ? 
@@ -274,12 +297,12 @@
                                 <ul class="list-group list-group-flush">
                                     ${category.skills && category.skills.length > 0 ? 
                                         category.skills.map(skill => 
-                                            `<li class="list-group-item">
+                                            `<li class="list-group-item ${skill.level === 5 ? 'max-level' : ''}">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <span>${skill.name}</span>
-                                                    <div class="skill-level">
+                                                    <div class="skill-level" title="LEVEL: ${skill.level || 0}/5">
                                                         ${Array(5).fill(0).map((_, i) => 
-                                                            `<span class="skill-point ${i < (skill.proficiency || 3) ? 'active' : ''}"></span>`
+                                                            `<span class="skill-point ${i < (skill.level || 0) ? 'active' : ''}" data-level="${i+1}"></span>`
                                                         ).join('')}
                                                     </div>
                                                 </div>
@@ -320,7 +343,7 @@
                                     <span>${language.name}</span>
                                     <span class="badge bg-primary rounded-0">${language.proficiency_level}</span>
                                 </div>
-                                ${language.certification ? `<small class="text-muted">CERTIFICATION: ${language.certification}</small>` : ''}
+                                ${language.certification ? `<div class="mt-1 certification-text"><i class="bi bi-patch-check-fill"></i> CERTIFICATION: ${language.certification}</div>` : ''}
                             </li>
                         `).join('')}
                     </ul>
@@ -445,6 +468,53 @@
         @keyframes skillPointPulse {
             0% { background-color: var(--accent); }
             100% { background-color: var(--secondary); }
+        }
+        
+        /* Skill point flash animation */
+        .skill-flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            opacity: 0;
+            pointer-events: none;
+            animation: skillFlash 0.5s ease-out;
+        }
+        
+        @keyframes skillFlash {
+            0% { opacity: 0.8; transform: scale(1); }
+            100% { opacity: 0; transform: scale(2); }
+        }
+        
+        /* Title and company styling */
+        .title-text {
+            color: var(--secondary);
+            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+            letter-spacing: 1px;
+            font-weight: 600;
+            display: inline-block;
+            animation: titleColorPulse 3s infinite alternate;
+        }
+        
+        .company-text {
+            color: var(--accent);
+            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7);
+            letter-spacing: 1px;
+            font-weight: 600;
+            display: inline-block;
+            animation: companyColorPulse 4s infinite alternate;
+        }
+        
+        @keyframes titleColorPulse {
+            0% { color: var(--secondary); }
+            100% { color: #00ffcc; }
+        }
+        
+        @keyframes companyColorPulse {
+            0% { color: var(--accent); }
+            100% { color: #ff9966; }
         }
     </style>
 </body>

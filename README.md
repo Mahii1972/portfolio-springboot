@@ -106,12 +106,17 @@ cd portfolio-springboot
 
 2. Set environment variables for database connection
 
-3. Build and run the application
+3. Build the application
+```
+mvn clean install
+```
+
+4. Run the application
 ```
 mvn spring-boot:run
 ```
 
-4. Access the application in a web browser
+5. Access the application in a web browser
 ```
 http://localhost:8080
 ```
