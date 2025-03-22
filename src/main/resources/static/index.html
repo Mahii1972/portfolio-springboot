@@ -92,7 +92,7 @@
                     clearInterval(loadingInterval);
                     // Add pixel loading sound effect
                     const audio = new Audio();
-                    audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'; // truncated for brevity
+                    audio.src = 'audio/loading.mp3'; // Using the MP3 file instead of base64 data
                     audio.volume = 0.2;
                     audio.play().catch(e => console.log('Audio play prevented by browser policy'));
                 }
