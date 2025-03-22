@@ -3,23 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Dashboard</title>
+    <title>8-Bit Portfolio</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container py-5">
-        <h1 class="text-center mb-5">My Portfolio</h1>
+        <h1 class="text-center mb-5 game-title">MY PORTFOLIO</h1>
         
         <div id="loading" class="loading">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <p class="mt-3">Loading portfolio data...</p>
+            <p class="mt-3">LOADING PORTFOLIO DATA...</p>
+            <div class="pixel-progress-bar">
+                <div class="pixel-progress" id="loading-progress"></div>
+            </div>
         </div>
         
         <div id="portfolio-data" style="display: none;">
@@ -29,25 +34,25 @@
             </div>
             
             <!-- Education Section -->
-            <h2 class="section-title">Education</h2>
+            <h2 class="section-title"><i class="bi bi-book-fill pixel-icon"></i> EDUCATION</h2>
             <div id="education" class="row">
                 <!-- Will be populated by JavaScript -->
             </div>
             
             <!-- Experience Section -->
-            <h2 class="section-title">Experience</h2>
+            <h2 class="section-title"><i class="bi bi-briefcase-fill pixel-icon"></i> EXPERIENCE</h2>
             <div id="experience" class="row">
                 <!-- Will be populated by JavaScript -->
             </div>
             
             <!-- Projects Section -->
-            <h2 class="section-title">Projects</h2>
+            <h2 class="section-title"><i class="bi bi-code-slash pixel-icon"></i> PROJECTS</h2>
             <div id="projects" class="row">
                 <!-- Will be populated by JavaScript -->
             </div>
             
             <!-- Skills Section -->
-            <h2 class="section-title">Skills</h2>
+            <h2 class="section-title"><i class="bi bi-lightning-fill pixel-icon"></i> SKILLS</h2>
             <div id="skills" class="row">
                 <!-- Will be populated by JavaScript -->
             </div>
@@ -55,14 +60,14 @@
             <!-- Interests and Languages Section -->
             <div class="row mt-4">
                 <div class="col-md-6">
-                    <h2 class="section-title">Interests</h2>
-                    <div id="interests">
+                    <h2 class="section-title"><i class="bi bi-controller pixel-icon"></i> INTERESTS</h2>
+                    <div id="interests" class="pixel-border">
                         <!-- Will be populated by JavaScript -->
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <h2 class="section-title">Languages</h2>
-                    <div id="languages">
+                    <h2 class="section-title"><i class="bi bi-chat-dots-fill pixel-icon"></i> LANGUAGES</h2>
+                    <div id="languages" class="pixel-border">
                         <!-- Will be populated by JavaScript -->
                     </div>
                 </div>
@@ -75,6 +80,24 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Add loading animation
+            let progress = 0;
+            const loadingBar = document.getElementById('loading-progress');
+            const loadingInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 100) progress = 100;
+                loadingBar.style.width = progress + '%';
+                
+                if (progress === 100) {
+                    clearInterval(loadingInterval);
+                    // Add pixel loading sound effect
+                    const audio = new Audio();
+                    audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'; // truncated for brevity
+                    audio.volume = 0.2;
+                    audio.play().catch(e => console.log('Audio play prevented by browser policy'));
+                }
+            }, 200);
+
             // Fetch portfolio data from API
             fetch('http://localhost:8080/api/portfolio/raw')
                 .then(response => {
@@ -86,14 +109,29 @@
                 .then(data => {
                     console.log('Portfolio data:', data);
                     displayPortfolioData(data);
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('portfolio-data').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('portfolio-data').style.display = 'block';
+                        
+                        // Add appearance animation to sections
+                        const sections = document.querySelectorAll('.section-title');
+                        sections.forEach((section, index) => {
+                            section.style.opacity = '0';
+                            section.style.transform = 'translateY(20px)';
+                            setTimeout(() => {
+                                section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                                section.style.opacity = '1';
+                                section.style.transform = 'translateY(0)';
+                            }, index * 300);
+                        });
+                    }, 1500); // Add delay to make loading animation visible
                 })
                 .catch(error => {
                     console.error('There has been a problem with your fetch operation:', error);
                     document.getElementById('loading').innerHTML = `
-                        <div class="alert alert-danger" role="alert">
-                            Error loading portfolio data: ${error.message}
+                        <div class="alert pixel-border" role="alert" style="background-color: #8B0000; color: white;">
+                            <i class="bi bi-exclamation-triangle-fill"></i> ERROR: ${error.message}
+                            <p class="mt-2">PRESS F5 TO RETRY</p>
                         </div>
                     `;
                 });
@@ -105,31 +143,31 @@
                 const personalInfo = data.personalInfo;
                 const personalInfoHTML = `
                     <div class="col-md-12">
-                        <div class="card">
+                        <div class="card pixel-border">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-3 text-center">
                                         <img src="${personalInfo.avatar_url || 'https://via.placeholder.com/150'}" 
                                              alt="${personalInfo.full_name}" 
-                                             class="img-fluid rounded-circle mb-3 profile-img">
+                                             class="img-fluid profile-img">
                                     </div>
                                     <div class="col-md-9">
-                                        <h2>${personalInfo.full_name || 'Name Not Available'}</h2>
-                                        <h4 class="text-muted">${personalInfo.title || 'Title Not Available'}</h4>
-                                        <p class="mb-2"><i class="bi bi-geo-alt-fill"></i> ${personalInfo.location || 'Location Not Available'}</p>
-                                        <p class="mb-2"><i class="bi bi-envelope-fill"></i> ${personalInfo.email || 'Email Not Available'}</p>
-                                        <p class="mb-2"><i class="bi bi-telephone-fill"></i> ${personalInfo.phone || 'Phone Not Available'}</p>
+                                        <h2>${personalInfo.full_name || 'NAME NOT AVAILABLE'}</h2>
+                                        <h4 class="text-muted">${personalInfo.title || 'TITLE NOT AVAILABLE'}</h4>
+                                        <p class="mb-2"><i class="bi bi-geo-alt-fill pixel-icon"></i> ${personalInfo.location || 'LOCATION NOT AVAILABLE'}</p>
+                                        <p class="mb-2"><i class="bi bi-envelope-fill pixel-icon"></i> ${personalInfo.email || 'EMAIL NOT AVAILABLE'}</p>
+                                        <p class="mb-2"><i class="bi bi-telephone-fill pixel-icon"></i> ${personalInfo.phone || 'PHONE NOT AVAILABLE'}</p>
                                         <div class="mt-3">
-                                            ${personalInfo.linkedin_url ? `<a href="https://${personalInfo.linkedin_url}" class="btn btn-outline-primary me-2" target="_blank"><i class="bi bi-linkedin"></i> LinkedIn</a>` : ''}
-                                            ${personalInfo.github_url ? `<a href="https://${personalInfo.github_url}" class="btn btn-outline-dark" target="_blank"><i class="bi bi-github"></i> GitHub</a>` : ''}
+                                            ${personalInfo.linkedin_url ? `<a href="https://${personalInfo.linkedin_url}" class="btn btn-outline-primary me-2" target="_blank"><i class="bi bi-linkedin"></i> LINKEDIN</a>` : ''}
+                                            ${personalInfo.github_url ? `<a href="https://${personalInfo.github_url}" class="btn btn-outline-dark" target="_blank"><i class="bi bi-github"></i> GITHUB</a>` : ''}
                                         </div>
                                     </div>
                                 </div>
                                 ${personalInfo.about_me ? `
                                 <div class="row mt-4">
                                     <div class="col-12">
-                                        <h5>About Me</h5>
-                                        <p>${personalInfo.about_me}</p>
+                                        <h5>ABOUT ME</h5>
+                                        <p class="pixel-text">${personalInfo.about_me}</p>
                                     </div>
                                 </div>` : ''}
                             </div>
@@ -146,17 +184,17 @@
                         <div class="timeline-item">
                             <div class="card">
                                 <div class="card-body">
-                                    <h5 class="card-title">${edu.institution || 'Institution Not Available'}</h5>
+                                    <h5 class="card-title">${edu.institution || 'INSTITUTION NOT AVAILABLE'}</h5>
                                     <h6 class="card-subtitle mb-2 text-muted">
                                         ${edu.degree || ''} ${edu.field_of_study ? `in ${edu.field_of_study}` : ''}
                                     </h6>
                                     <p class="card-text">
                                         <small class="text-muted">
-                                            <i class="bi bi-calendar-event"></i> ${formatDate(edu.start_date)} - ${formatDate(edu.end_date)}
+                                            <i class="bi bi-calendar-event pixel-icon"></i> ${formatDate(edu.start_date)} - ${formatDate(edu.end_date)}
                                         </small>
                                     </p>
-                                    ${edu.grade ? `<p class="card-text"><i class="bi bi-award"></i> Grade: ${edu.grade}</p>` : ''}
-                                    ${edu.location ? `<p class="card-text"><i class="bi bi-geo-alt"></i> Location: ${edu.location}</p>` : ''}
+                                    ${edu.grade ? `<p class="card-text"><i class="bi bi-award pixel-icon"></i> GRADE: ${edu.grade}</p>` : ''}
+                                    ${edu.location ? `<p class="card-text"><i class="bi bi-geo-alt pixel-icon"></i> LOCATION: ${edu.location}</p>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -164,7 +202,7 @@
                 `).join('');
                 document.getElementById('education').innerHTML = educationHTML;
             } else {
-                document.getElementById('education').innerHTML = '<div class="col-12"><p class="text-muted">No education information available</p></div>';
+                document.getElementById('education').innerHTML = '<div class="col-12"><p class="text-muted pixel-text">NO EDUCATION DATA FOUND</p></div>';
             }
 
             // Display Experience
@@ -174,15 +212,15 @@
                         <div class="timeline-item">
                             <div class="card">
                                 <div class="card-body">
-                                    <h5 class="card-title">${exp.title || 'Title Not Available'}</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">${exp.company || 'Company Not Available'}</h6>
+                                    <h5 class="card-title">${exp.title || 'TITLE NOT AVAILABLE'}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">${exp.company || 'COMPANY NOT AVAILABLE'}</h6>
                                     <p class="card-text">
                                         <small class="text-muted">
-                                            ${formatDate(exp.start_date)} - ${exp.is_current ? 'Present' : formatDate(exp.end_date)}
+                                            ${formatDate(exp.start_date)} - ${exp.is_current ? 'PRESENT' : formatDate(exp.end_date)}
                                             ${exp.location ? ` | ${exp.location}` : ''}
                                         </small>
                                     </p>
-                                    ${exp.description ? `<p class="card-text">${exp.description}</p>` : ''}
+                                    ${exp.description ? `<p class="card-text pixel-text">${exp.description}</p>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -190,7 +228,7 @@
                 `).join('');
                 document.getElementById('experience').innerHTML = experienceHTML;
             } else {
-                document.getElementById('experience').innerHTML = '<div class="col-12"><p class="text-muted">No experience information available</p></div>';
+                document.getElementById('experience').innerHTML = '<div class="col-12"><p class="text-muted pixel-text">NO EXPERIENCE DATA FOUND</p></div>';
             }
 
             // Display Projects
@@ -199,12 +237,14 @@
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card h-100">
                             ${project.image_url ? `
-                                <img src="${project.image_url}" class="card-img-top" alt="${project.title}">
+                                <div class="project-image-container">
+                                    <img src="${project.image_url}" class="card-img-top pixel-img" alt="${project.title}">
+                                </div>
                             ` : ''}
                             <div class="card-body">
-                                <h5 class="card-title">${project.title || 'Project Title Not Available'}</h5>
+                                <h5 class="card-title">${project.title || 'PROJECT TITLE NOT AVAILABLE'}</h5>
                                 <h6 class="card-subtitle mb-2 text-muted">${project.year || ''}</h6>
-                                <p class="card-text">${project.description || 'No description available'}</p>
+                                <p class="card-text pixel-text">${project.description || 'NO DESCRIPTION AVAILABLE'}</p>
                                 <div class="mb-3">
                                     ${project.technologies && project.technologies.length > 0 ? 
                                         project.technologies.map(tech => 
@@ -212,8 +252,8 @@
                                         ).join('') : ''}
                                 </div>
                                 <div class="d-flex gap-2">
-                                    ${project.project_url ? `<a href="${project.project_url}" class="btn btn-sm btn-primary" target="_blank">View Project</a>` : ''}
-                                    ${project.github_url ? `<a href="${project.github_url}" class="btn btn-sm btn-outline-dark" target="_blank">View Code</a>` : ''}
+                                    ${project.project_url ? `<a href="${project.project_url}" class="btn btn-primary" target="_blank">VIEW PROJECT</a>` : ''}
+                                    ${project.github_url ? `<a href="${project.github_url}" class="btn btn-outline-dark" target="_blank">VIEW CODE</a>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -221,22 +261,31 @@
                 `).join('');
                 document.getElementById('projects').innerHTML = projectsHTML;
             } else {
-                document.getElementById('projects').innerHTML = '<div class="col-12"><p class="text-muted">No projects available</p></div>';
+                document.getElementById('projects').innerHTML = '<div class="col-12"><p class="text-muted pixel-text">NO PROJECTS AVAILABLE</p></div>';
             }
 
             // Display Skills
             if (data.skillCategories && data.skillCategories.length > 0) {
                 const skillsHTML = data.skillCategories.map(category => `
                     <div class="col-md-4 mb-4">
-                        <div class="card h-100">
+                        <div class="card skill-card h-100">
                             <div class="card-body">
-                                <h5 class="card-title">${category.name || 'Category'}</h5>
+                                <h5 class="card-title">${category.name || 'CATEGORY'}</h5>
                                 <ul class="list-group list-group-flush">
                                     ${category.skills && category.skills.length > 0 ? 
                                         category.skills.map(skill => 
-                                            `<li class="list-group-item">${skill.name}</li>`
+                                            `<li class="list-group-item">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span>${skill.name}</span>
+                                                    <div class="skill-level">
+                                                        ${Array(5).fill(0).map((_, i) => 
+                                                            `<span class="skill-point ${i < (skill.proficiency || 3) ? 'active' : ''}"></span>`
+                                                        ).join('')}
+                                                    </div>
+                                                </div>
+                                            </li>`
                                         ).join('') : 
-                                        '<li class="list-group-item">No skills in this category</li>'}
+                                        '<li class="list-group-item">NO SKILLS IN THIS CATEGORY</li>'}
                                 </ul>
                             </div>
                         </div>
@@ -244,7 +293,7 @@
                 `).join('');
                 document.getElementById('skills').innerHTML = skillsHTML;
             } else {
-                document.getElementById('skills').innerHTML = '<div class="col-12"><p class="text-muted">No skills information available</p></div>';
+                document.getElementById('skills').innerHTML = '<div class="col-12"><p class="text-muted pixel-text">NO SKILLS INFORMATION AVAILABLE</p></div>';
             }
 
             // Display Interests
@@ -252,13 +301,13 @@
                 const interestsHTML = `
                     <ul class="list-group">
                         ${data.interests.map(interest => 
-                            `<li class="list-group-item">${interest.name}</li>`
+                            `<li class="list-group-item"><i class="bi bi-caret-right-fill pixel-icon"></i> ${interest.name}</li>`
                         ).join('')}
                     </ul>
                 `;
                 document.getElementById('interests').innerHTML = interestsHTML;
             } else {
-                document.getElementById('interests').innerHTML = '<p class="text-muted">No interests information available</p>';
+                document.getElementById('interests').innerHTML = '<p class="text-muted pixel-text">NO INTERESTS INFORMATION AVAILABLE</p>';
             }
 
             // Display Languages
@@ -269,16 +318,16 @@
                             <li class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span>${language.name}</span>
-                                    <span class="badge bg-primary rounded-pill">${language.proficiency_level}</span>
+                                    <span class="badge bg-primary rounded-0">${language.proficiency_level}</span>
                                 </div>
-                                ${language.certification ? `<small class="text-muted">Certification: ${language.certification}</small>` : ''}
+                                ${language.certification ? `<small class="text-muted">CERTIFICATION: ${language.certification}</small>` : ''}
                             </li>
                         `).join('')}
                     </ul>
                 `;
                 document.getElementById('languages').innerHTML = languagesHTML;
             } else {
-                document.getElementById('languages').innerHTML = '<p class="text-muted">No languages information available</p>';
+                document.getElementById('languages').innerHTML = '<p class="text-muted pixel-text">NO LANGUAGES INFORMATION AVAILABLE</p>';
             }
         }
 
@@ -290,8 +339,113 @@
             if (isNaN(date.getTime())) return dateString; // Return as is if invalid
             
             const options = { year: 'numeric', month: 'short' };
-            return date.toLocaleDateString('en-US', options);
+            return date.toLocaleDateString('en-US', options).toUpperCase();
         }
     </script>
+
+    <style>
+        /* Additional pixelated game styles */
+        .game-title {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 4px 4px 0 var(--primary);
+            animation: titleBounce 2s infinite;
+        }
+        
+        @keyframes titleBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .pixel-icon {
+            color: var(--accent);
+            margin-right: 8px;
+            image-rendering: pixelated;
+            transform: scale(1.2);
+        }
+        
+        .pixel-text {
+            image-rendering: pixelated;
+            letter-spacing: 1px;
+        }
+        
+        .pixel-img {
+            image-rendering: pixelated;
+            border-bottom: 4px solid var(--primary);
+        }
+        
+        .pixel-progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 4px solid var(--primary);
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pixel-progress {
+            height: 100%;
+            width: 0%;
+            background: repeating-linear-gradient(
+                45deg,
+                var(--primary),
+                var(--primary) 10px,
+                var(--secondary) 10px,
+                var(--secondary) 20px
+            );
+            transition: width 0.2s ease;
+        }
+        
+        .project-image-container {
+            overflow: hidden;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        
+        .project-image-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(
+                rgba(0, 0, 0, 0.1) 1px, 
+                transparent 1px
+            ),
+            linear-gradient(
+                90deg,
+                rgba(0, 0, 0, 0.1) 1px, 
+                transparent 1px
+            );
+            background-size: 4px 4px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .skill-level {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .skill-point {
+            width: 12px;
+            height: 12px;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        }
+        
+        .skill-point.active {
+            background-color: var(--accent);
+            animation: skillPointPulse 2s infinite alternate;
+        }
+        
+        @keyframes skillPointPulse {
+            0% { background-color: var(--accent); }
+            100% { background-color: var(--secondary); }
+        }
+    </style>
 </body>
 </html> 
