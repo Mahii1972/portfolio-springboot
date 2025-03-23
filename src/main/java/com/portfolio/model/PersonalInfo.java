@@ -24,6 +24,7 @@ public class PersonalInfo {
     private String phone;
     private LocalDate birthDate;
     private String githubUrl;
+    private String leetcodeUrl;
     private String aboutMe;
     private String declaration;
     private String avatarUrl;

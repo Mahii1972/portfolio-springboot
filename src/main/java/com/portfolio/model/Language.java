@@ -16,4 +16,5 @@ public class Language {
     private String name;
     private String proficiencyLevel;
     private String certification;
+    private String certificateUrl;
 } 

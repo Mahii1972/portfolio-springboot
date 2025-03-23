@@ -99,7 +99,7 @@ public class PortfolioService {
         // Personal info
         List<Map<String, Object>> personalInfo = jdbcTemplate.queryForList(
             "SELECT full_name, title, email, location, linkedin_url, phone, " +
-            "birth_date, github_url, about_me, declaration, avatar_url " +
+            "birth_date, github_url, leetcode_url, about_me, declaration, avatar_url " +
             "FROM personal_info LIMIT 1");
         
         if (!personalInfo.isEmpty()) {
@@ -162,7 +162,7 @@ public class PortfolioService {
         
         // Languages
         result.put("languages", jdbcTemplate.queryForList(
-            "SELECT name, proficiency_level, certification FROM languages"));
+            "SELECT name, proficiency_level, certification, certificate_url FROM languages"));
         
         return result;
     }
