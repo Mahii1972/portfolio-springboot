@@ -99,7 +99,7 @@
             }, 200);
 
             // Fetch portfolio data from API
-            fetch('http://localhost:8080/api/portfolio/raw')
+            fetch('/api/portfolio/raw')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
